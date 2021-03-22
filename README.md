@@ -26,7 +26,7 @@ And then it merges deduplicated texts.
 
 ```
 git clone https://github.com/lovit/text-dedup.git
-cd text_dedup
+cd text-dedup
 python setup.py install
 ```
 
