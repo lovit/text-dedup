@@ -63,7 +63,9 @@ text-dedup \
 
 Elapsed times in i7-5820
 
-| num lines / num tokens | file size | elapsed time |
-| --- | --- | --- |
-| 1,607,769 / 18,923,834 | 209M (a single text file) | 01:50 |
-| 33,884,047 / 607,593,167 | 6.0G (166 text files) | 49:02 |
+| num lines / num tokens | file size | prefix length | elapsed time | max shard size |
+| --- | --- | --- | --- | --- |
+| 1,607,769 / 18,923,834 | 209MB (a single text file) | 2 | 01:34 | 1.2MB |
+| 1,607,769 / 18,923,834 | 209MB (a single text file) | 4 | 01:50 | 28KB |
+| 33,884,047 / 607,593,167 | 6.0GB (166 text files) | 2 | 27:18 | 107MB |
+| 33,884,047 / 607,593,167 | 6.0GB (166 text files) | 4 | 49:02 | 208KB |
