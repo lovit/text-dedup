@@ -13,12 +13,12 @@
 ```
 text-dedup/
 ├── text_dedup/
-│   ├── __init__.py       # __version__, __name__ export
-│   ├── about.py          # 패키지 메타데이터 (version, author 등)
+│   ├── __init__.py       # __version__ export (importlib.metadata)
 │   ├── cli.py            # CLI 진입점 (argparse 기반)
 │   └── encoder.py        # 핵심 로직 (Normalizer, Encoder, task_*)
-├── setup.py              # setuptools 빌드 설정
-├── requirements.txt      # tqdm
+├── pyproject.toml        # 빌드 설정 + ruff 설정
+├── .pre-commit-config.yaml # pre-commit 훅 설정
+├── uv.lock               # uv 의존성 잠금 파일
 ├── README.md
 └── LICENSE
 ```
@@ -49,10 +49,10 @@ text-dedup/
 # 설치
 git clone https://github.com/lovit/text-dedup.git
 cd text-dedup
-python setup.py install
+uv sync
 
 # 실행
-text-dedup \
+uv run text-dedup \
   --inputs path/to/textfile \
   --shard path/to/shard-directory \
   --output path/to/deduplicated.text \
@@ -77,19 +77,31 @@ text-dedup \
 
 ## 빌드 시스템
 
-- `setup.py` + `setuptools` 사용
-- `about.py`에서 버전/이름/작성자 동적 로드
-- `requirements.txt`에서 의존성 로드
+- `pyproject.toml` + `hatchling` 빌드 백엔드
+- `uv`로 패키지 관리 (`uv sync`, `uv run`)
+- 버전은 `pyproject.toml`에서 관리, 런타임에서는 `importlib.metadata`로 접근
 - 콘솔 스크립트: `text-dedup=text_dedup.cli:main`
 
 ## 코드 컨벤션
 
 - **네이밍**: snake_case (함수/변수), PascalCase (클래스)
-- **Type hints**: `typing` 모듈 사용 (`List`, `Union`)
+- **Type hints**: Python 3.12 내장 문법 사용 (`list`, `X | Y`)
 - **인코딩**: 모든 파일 I/O에 `encoding="utf-8"` 명시
 - **멀티프로세싱**: `multiprocessing.Pool`과 `imap` 사용
 - **오케스트레이션 함수**: `task_` 프리픽스 (예: `task_encode`, `task_merge`, `task_dedup`)
 - **CJK 지원**: 기본 정규화 패턴에 한글 범위 포함
+
+## 린터 및 포매터
+
+- `ruff` 사용 (lint + format)
+- 규칙: `E`, `F`, `I` (isort), `UP` (pyupgrade)
+- `pre-commit`으로 커밋 시 자동 실행
+
+```bash
+uv run ruff check .        # 린트
+uv run ruff format .       # 포맷
+uv run pre-commit install  # 훅 설치
+```
 
 ## 테스트
 
