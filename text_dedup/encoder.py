@@ -5,6 +5,7 @@ from collections import defaultdict
 from glob import glob
 from hashlib import sha1
 from multiprocessing import Pool, cpu_count
+
 from tqdm import tqdm
 
 
@@ -24,6 +25,7 @@ class Encoder:
         >>> encoder("예문입니다")
         $ ('예문입니다', '93620c8a877cbc8701923138c217c9a8327815e1')
     """
+
     def __init__(self, hash_func_type, normalizer):
         self.normalizer = normalizer
         if callable(hash_func_type):
@@ -53,10 +55,12 @@ def encode_a_file(
     chunksize: int,
     n_processes: int,
     hash_func: Encoder,
-    prefix_length: int = 4
+    prefix_length: int = 4,
 ):
     assert chunksize > 0 and n_processes > 0
-    n_lines = int(os.popen(f"wc -l {os.path.abspath(inpath)}").read().strip().split()[0])
+    n_lines = int(
+        os.popen(f"wc -l {os.path.abspath(inpath)}").read().strip().split()[0]
+    )
     batchsize = n_processes * chunksize
     batch_lines = []
     with open(inpath, encoding="utf-8") as f:
@@ -66,7 +70,9 @@ def encode_a_file(
                 continue
             batch_lines.append(line)
             if len(batch_lines) >= batchsize:
-                encoded_lines = hash_func.encode_batch(batch_lines, n_processes, chunksize)
+                encoded_lines = hash_func.encode_batch(
+                    batch_lines, n_processes, chunksize
+                )
                 save_shards(shard_root, encoded_lines, prefix_length)
                 batch_lines = []
         if batch_lines:
@@ -81,7 +87,7 @@ def task_encode(
     n_processes: int,
     hash_func_type: str = "sha1",
     hash_func_input_format: str = "0-9가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z",
-    prefix_length: int = 4
+    prefix_length: int = 4,
 ):
     if isinstance(inputs, str):
         if os.path.isdir(inputs):
@@ -107,7 +113,7 @@ def task_merge(
     shard_root: str,
     prefix_length: int = 4,
     max_block_size: int = None,
-    sort: bool = False
+    sort: bool = False,
 ):
     depth = math.ceil(prefix_length / 2)
     wildcard = os.path.sep.join(["*"] * depth)
@@ -137,7 +143,9 @@ def task_merge(
 
         # blocking
         texts_size = sum(len(text.encode("utf-8")) for text in texts) + len(texts)
-        if (max_block_size is not None) and ((block_size + texts_size) > max_block_size):
+        if (max_block_size is not None) and (
+            (block_size + texts_size) > max_block_size
+        ):
             block_size, block_index = texts_size, (block_index + 1)
             output_path = f"{output}.{block_index}"
         else:
@@ -170,7 +178,7 @@ def task_dedup(
     max_block_size: int | str | None = None,
     sort: bool = False,
     keep: bool = False,
-    prefix_length: int = 4
+    prefix_length: int = 4,
 ):
     if sort and not keep:
         raise ValueError("`sort` is available only when `keep=True`. use `--keep`")
@@ -204,18 +212,14 @@ def task_dedup(
         shard_root=shard_root,
         prefix_length=prefix_length,
         max_block_size=max_block_size,
-        sort=sort
+        sort=sort,
     )
 
     if not keep:
         os.system(f"rm -r {os.path.abspath(shard_root)}")
 
 
-def save_shards(
-    shard_root: str,
-    encoded_lines: list[str],
-    prefix_length: int = 4
-):
+def save_shards(shard_root: str, encoded_lines: list[str], prefix_length: int = 4):
     assert prefix_length >= 2
     shards = defaultdict(lambda: [])
     for line, code in encoded_lines:
@@ -235,7 +239,7 @@ def get_shard_path(shard_root: str, code: str):
         $'path/to/12/34/56/78.shard'
     """
     n_chars = len(code)
-    subpath = "/".join([code[b: b + 2] for b in range(0, n_chars, 2)])
+    subpath = "/".join([code[b : b + 2] for b in range(0, n_chars, 2)])
     path = f"{shard_root}/{subpath}.shard"
     return path
 
@@ -254,14 +258,14 @@ def humanized_to_number(max_block_size):
     try:
         max_block_size = int(max_block_size)
         return max_block_size
-    except Exception as err:
+    except Exception:
         max_block_size = max_block_size.lower()
-        if ("k" in max_block_size):
+        if "k" in max_block_size:
             max_block_size = int(float(max_block_size.split("k")[0]) * (1024))
-        elif ("m" in max_block_size):
-            max_block_size = int(float(max_block_size.split("m")[0]) * (1024 ** 2))
-        elif ("g" in max_block_size):
-            max_block_size = int(float(max_block_size.split("g")[0]) * (1024 ** 3))
+        elif "m" in max_block_size:
+            max_block_size = int(float(max_block_size.split("m")[0]) * (1024**2))
+        elif "g" in max_block_size:
+            max_block_size = int(float(max_block_size.split("g")[0]) * (1024**3))
         else:
             raise ValueError("`max_block_size` examples: 10Kb, 23Mb, 4.5Gb")
         return max_block_size
