@@ -1,2 +1,3 @@
-from .about import __version__
-from .about import __name__
+from importlib.metadata import version
+
+__version__ = version("text_dedup")
