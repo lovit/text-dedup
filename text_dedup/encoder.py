@@ -6,7 +6,6 @@ from glob import glob
 from hashlib import sha1
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
-from typing import List, Union
 
 
 class Normalizer:
@@ -42,7 +41,7 @@ class Encoder:
         code = self.hash(norm.encode("utf-8")).hexdigest()
         return line, code
 
-    def encode_batch(self, lines: List[str], n_processes: int, chunksize: int = None):
+    def encode_batch(self, lines: list[str], n_processes: int, chunksize: int = None):
         with Pool(processes=n_processes) as p:
             out = list(p.imap(self.encode, lines, chunksize=chunksize))
         return out
@@ -76,7 +75,7 @@ def encode_a_file(
 
 
 def task_encode(
-    inputs: Union[str, List[str]],
+    inputs: str | list[str],
     shard_root: str,
     chunksize: int,
     n_processes: int,
@@ -161,14 +160,14 @@ def task_merge(
 
 
 def task_dedup(
-    inputs: Union[str, List[str]],
+    inputs: str | list[str],
     output: str,
     shard_root: str,
     chunksize: int,
     n_processes: int = None,
     hash_func_type: str = "sha1",
     hash_func_input_format: str = "0-9가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z",
-    max_block_size: Union[int, str] = None,
+    max_block_size: int | str | None = None,
     sort: bool = False,
     keep: bool = False,
     prefix_length: int = 4
@@ -214,7 +213,7 @@ def task_dedup(
 
 def save_shards(
     shard_root: str,
-    encoded_lines: List[str],
+    encoded_lines: list[str],
     prefix_length: int = 4
 ):
     assert prefix_length >= 2
