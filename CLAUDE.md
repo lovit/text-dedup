@@ -17,8 +17,9 @@ text-dedup/
 │   ├── about.py          # 패키지 메타데이터 (version, author 등)
 │   ├── cli.py            # CLI 진입점 (argparse 기반)
 │   └── encoder.py        # 핵심 로직 (Normalizer, Encoder, task_*)
-├── setup.py              # setuptools 빌드 설정
-├── requirements.txt      # tqdm
+├── pyproject.toml        # 프로젝트 메타데이터 및 빌드 설정 (uv + hatchling)
+├── uv.lock               # uv 잠금 파일
+├── .python-version       # Python 3.12
 ├── README.md
 └── LICENSE
 ```
@@ -49,10 +50,10 @@ text-dedup/
 # 설치
 git clone https://github.com/lovit/text-dedup.git
 cd text-dedup
-python setup.py install
+uv sync
 
 # 실행
-text-dedup \
+uv run text-dedup \
   --inputs path/to/textfile \
   --shard path/to/shard-directory \
   --output path/to/deduplicated.text \
@@ -77,9 +78,9 @@ text-dedup \
 
 ## 빌드 시스템
 
-- `setup.py` + `setuptools` 사용
-- `about.py`에서 버전/이름/작성자 동적 로드
-- `requirements.txt`에서 의존성 로드
+- `uv` + `pyproject.toml` + `hatchling` 사용
+- Python 3.12 기반 (`.python-version`으로 지정)
+- `about.py`에서 런타임 버전/이름/작성자 제공
 - 콘솔 스크립트: `text-dedup=text_dedup.cli:main`
 
 ## 코드 컨벤션
