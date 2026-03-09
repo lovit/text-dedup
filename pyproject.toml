@@ -1,0 +1,25 @@
+[project]
+name = "text-dedup"
+version = "0.1.0"
+description = "deduplicate texts"
+authors = [
+    { name = "lovit" },
+]
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = [
+    "tqdm",
+]
+
+[project.scripts]
+text-dedup = "text_dedup.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
